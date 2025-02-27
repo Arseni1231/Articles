@@ -34,7 +34,7 @@ public class Article {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-    @Column(length = 50)
+    @Column(length = 120)
     private String description;
 
     @Column(nullable = false, length = 50, unique = true)
@@ -66,5 +66,76 @@ public class Article {
         this.tags = tags;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public LocalDateTime getCreated_at() {
+        return created_at;
+    }
+
+    public LocalDateTime getUpdated_at() {
+        return updated_at;
+    }
+
+    public User getAuthor() {
+        return author;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setCreated_at(LocalDateTime created_at) {
+        this.created_at = created_at;
+    }
+
+    public void setUpdated_at(LocalDateTime updated_at) {
+        this.updated_at = updated_at;
+    }
+
+    public void setAuthor(User author) {
+        this.author = author;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
 }
 

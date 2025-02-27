@@ -12,67 +12,86 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Component
 public class InsertData implements CommandLineRunner {
 
-    private final UserRepository userRepository;
-    private final ArticleRepository articleRepository;
-    private final TagRepository tagRepository;
+    private UserRepository userRepository;
 
-    public InsertData(UserRepository userRepository, ArticleRepository articleRepository, TagRepository tagRepository) {
-        this.userRepository = userRepository;
+    private ArticleRepository articleRepository;
+
+    private TagRepository tagRepository;
+
+
+    private Faker faker = new Faker();
+
+    Random random = new Random();
+
+    public InsertData(ArticleRepository articleRepository, TagRepository tagRepository, UserRepository userRepository) {
         this.articleRepository = articleRepository;
         this.tagRepository = tagRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
     @Transactional
-    public void run(String... args) throws Exception {
-        System.out.println("Insert data is starting...");
 
-        if (userRepository.count() > 0) {
-            return;
+
+
+    public void run(String... args) throws Exception {
+        seedUsers();
+        seedTag();
+        seedArticles();
         }
 
-        // Создаем объект Faker для генерации случайных данных
-        Faker faker = new Faker();
 
-        // Генерация случайных пользователей
-        User user1 = new User(null, faker.internet().emailAddress(), LocalDateTime.now(), faker.name().username(), faker.internet().image(), faker.internet().password(), faker.lorem().paragraph()
-        );
+        private void seedUsers() {
+        for (int i = 0; i < 5; i++) {
+            User user = new User();
+            user.setEmail(faker.internet().emailAddress());
+            user.setUsername(faker.name().username());
+            user.setPassword("228228");
+            user.setBio(faker.lorem().sentence());
+            userRepository.save(user);
 
-        User user2 = new User(null, faker.internet().emailAddress(), LocalDateTime.now(), faker.name().username(), faker.internet().image(), faker.internet().password(), faker.lorem().paragraph()
-        );
+        }
+        }
 
-        // Сохраняем пользователей в базе данных
-        userRepository.saveAll(List.of(user1, user2));
+        private void seedTag() {
+        List<String> tagNames=List.of("Technology", "IT", "AI", "Developer");
+        for (String tagName : tagNames) {
+            Tag tag = new Tag();
+            tag.setName(tagName);
+            tagRepository.save(tag);
+        }
+        }
 
-        // Генерация случайных тегов
-        Tag tag1 = new Tag(null, LocalDateTime.now(), null, faker.lorem().word());
-        Tag tag2 = new Tag(null, LocalDateTime.now(), null, faker.lorem().word());
-        Tag tag3 = new Tag(null, LocalDateTime.now(), null, faker.lorem().word());
 
-        tagRepository.saveAll(List.of(tag1, tag2, tag3));
 
-        // Генерация случайных статей
-        Article article1 = new Article(null, LocalDateTime.now(),
-                null, user1, faker.lorem().sentence(), faker.lorem().word(), faker.lorem().sentence(), faker.lorem().paragraph(), List.of(tag1, tag2)
-        );
+        private void seedArticles() {
+            List<User> authors = userRepository.findAll();
+            List<Tag> tags = tagRepository.findAll();
+            for (int i = 0; i < 5; i++) {
+            Article article = new Article();
 
-        Article article2 = new Article(
-                null, LocalDateTime.now(), null, user2, faker.lorem().sentence(), faker.lorem().word(), faker.lorem().sentence(), faker.lorem().paragraph(), List.of(tag2, tag3)
-        );
-
-        // Связываем теги с статьями
-        tag1.setArticles(List.of(article1));
-        tag2.setArticles(List.of(article1, article2));
-        tag3.setArticles(List.of(article2));
-
-        // Сохраняем статьи и теги в базе данных
-        articleRepository.saveAll(List.of(article1, article2));
-        tagRepository.saveAll(List.of(tag1, tag2, tag3));
+            article.setAuthor(authors.get(random.nextInt(authors.size())));
+            article.setTitle(faker.book().title());
+            article.setSlug(article.getTitle().toLowerCase().replaceAll("[^a-zA-Z0-9]", "")
+                    .replaceAll("\\s+", "-") + "-" + 1);
+            article.setContent(faker.lorem().paragraph(5));
+            article.setDescription(faker.lorem().sentence());
+            int tagCount = random.nextInt(3) + 1;
+            if(article.getTags() == null){
+                article.setTags(new ArrayList<>());
+        }
+            for(int j = 0; j < tagCount; j++){
+                article.getTags().add(tags.get(random.nextInt(tags.size())));
+            }
+            articleRepository.save(article);
+        }
 
         System.out.println("Данные успешно загружены!");
     }
